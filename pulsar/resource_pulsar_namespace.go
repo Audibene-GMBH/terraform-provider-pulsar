@@ -28,9 +28,9 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/pulsar/utils"
 	"github.com/streamnative/terraform-provider-pulsar/types"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/streamnative/pulsarctl/pkg/pulsar"
+	"github.com/streamnative/terraform-provider-pulsar/hashcode"
 )
 
 func resourcePulsarNamespace() *schema.Resource {
