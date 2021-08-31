@@ -18,10 +18,12 @@
 package pulsar
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/streamnative/pulsarctl/pkg/pulsar"
 	"github.com/streamnative/pulsarctl/pkg/pulsar/common"
@@ -70,7 +72,7 @@ func Provider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	provider.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		tfVersion := provider.TerraformVersion
 		if tfVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol, so if this field is missing,
@@ -79,10 +81,14 @@ func Provider() *schema.Provider {
 		}
 
 		if err := validatePulsarConfig(d); err != nil {
-			return nil, err
+			return nil, diag.FromErr(err)
 		}
 
-		return providerConfigure(d, tfVersion)
+		output, err := providerConfigure(d, tfVersion)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		return output, nil
 	}
 
 	return provider

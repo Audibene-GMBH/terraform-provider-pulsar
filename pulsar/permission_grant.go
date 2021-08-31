@@ -37,9 +37,10 @@ func permissionGrantToHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func unmarshalPermissionGrants(v []interface{}) ([]*types.PermissionGrant, error) {
-	permissionGrants := make([]*types.PermissionGrant, 0, len(v))
-	for _, grant := range v {
+func unmarshalPermissionGrants(v *schema.Set) ([]*types.PermissionGrant, error) {
+	grants := v.List()
+	permissionGrants := make([]*types.PermissionGrant, 0, len(grants))
+	for _, grant := range grants {
 		data := grant.(map[string]interface{})
 
 		var permissionGrant types.PermissionGrant

@@ -209,7 +209,7 @@ func resourcePulsarNamespace() *schema.Resource {
 				Set: persistencePoliciesToHash,
 			},
 			"permission_grant": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				MinItems: 0,
 				Elem: &schema.Resource{
@@ -392,7 +392,7 @@ func resourcePulsarNamespaceRead(d *schema.ResourceData, meta interface{}) error
 		}))
 	}
 
-	if permissionGrantCfg, ok := d.GetOk("permission_grant"); ok && len(permissionGrantCfg.([]interface{})) > 0 {
+	if permissionGrantCfg, ok := d.GetOk("permission_grant"); ok && len(permissionGrantCfg.(*schema.Set).List()) > 0 {
 		grants, err := client.GetNamespacePermissions(*ns)
 		if err != nil {
 			return fmt.Errorf("ERROR_READ_NAMESPACE: GetNamespacePermissions: %w", err)
@@ -415,7 +415,7 @@ func resourcePulsarNamespaceUpdate(d *schema.ResourceData, meta interface{}) err
 	backlogQuotaConfig := d.Get("backlog_quota").(*schema.Set)
 	dispatchRateConfig := d.Get("dispatch_rate").(*schema.Set)
 	persistencePoliciesConfig := d.Get("persistence_policies").(*schema.Set)
-	permissionGrantConfig := d.Get("permission_grant").([]interface{})
+	permissionGrantConfig := d.Get("permission_grant").(*schema.Set)
 
 	nsName, err := utils.GetNameSpaceName(tenant, namespace)
 	if err != nil {
@@ -518,7 +518,7 @@ func resourcePulsarNamespaceUpdate(d *schema.ResourceData, meta interface{}) err
 
 			// Revoke permissions for roles removed from the set
 			oldPermissionGrants, _ := d.GetChange("permission_grant")
-			for _, oldGrant := range oldPermissionGrants.([]interface{}) {
+			for _, oldGrant := range oldPermissionGrants.(*schema.Set).List() {
 				oldRole := oldGrant.(map[string]interface{})["role"].(string)
 				found := false
 				for _, newGrant := range permissionGrants {

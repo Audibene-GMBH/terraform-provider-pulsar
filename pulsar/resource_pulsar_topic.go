@@ -65,7 +65,7 @@ func resourcePulsarTopic() *schema.Resource {
 				ValidateFunc: validateGtEq0,
 			},
 			"permission_grant": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				MinItems: 0,
 				Elem: &schema.Resource{
@@ -156,7 +156,7 @@ func resourcePulsarTopicRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("topic_name", topicName.GetLocalName())
 	_ = d.Set("partitions", tm.Partitions)
 
-	if permissionGrantCfg, ok := d.GetOk("permission_grant"); ok && len(permissionGrantCfg.([]interface{})) > 0 {
+	if permissionGrantCfg, ok := d.GetOk("permission_grant"); ok && permissionGrantCfg.(*schema.Set).Len() > 0 {
 		grants, err := client.GetPermissions(*topicName)
 		if err != nil {
 			return fmt.Errorf("ERROR_READ_TOPIC: GetPermissions: %w", err)
@@ -276,7 +276,7 @@ func unmarshalPartitions(d *schema.ResourceData) (int, error) {
 func updatePermissionGrant(d *schema.ResourceData, meta interface{}, topicName *utils.TopicName) error {
 	client := meta.(pulsar.Client).Topics()
 
-	permissionGrantConfig := d.Get("permission_grant").([]interface{})
+	permissionGrantConfig := d.Get("permission_grant").(*schema.Set)
 	permissionGrants, err := unmarshalPermissionGrants(permissionGrantConfig)
 
 	if err != nil {
@@ -291,7 +291,7 @@ func updatePermissionGrant(d *schema.ResourceData, meta interface{}, topicName *
 
 	// Revoke permissions for roles removed from the set
 	oldPermissionGrants, _ := d.GetChange("permission_grant")
-	for _, oldGrant := range oldPermissionGrants.([]interface{}) {
+	for _, oldGrant := range oldPermissionGrants.(*schema.Set).List() {
 		oldRole := oldGrant.(map[string]interface{})["role"].(string)
 		found := false
 		for _, newGrant := range permissionGrants {
