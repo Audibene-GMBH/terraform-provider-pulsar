@@ -113,8 +113,8 @@ func testTenantImported() resource.ImportStateCheckFunc {
 			return fmt.Errorf("expected %d states, got %d: %#v", 1, len(s), s)
 		}
 
-		if len(s[0].Attributes) != 5 {
-			return fmt.Errorf("expected %d attrs, got %d: %#v", 5, len(s[0].Attributes), s[0].Attributes)
+		if len(s[0].Attributes) != 6 {
+			return fmt.Errorf("expected %d attrs, got %d: %#v", 6, len(s[0].Attributes), s[0].Attributes)
 		}
 
 		return nil
