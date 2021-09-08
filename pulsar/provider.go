@@ -69,6 +69,7 @@ func Provider() *schema.Provider {
 			"pulsar_cluster":   resourcePulsarCluster(),
 			"pulsar_namespace": resourcePulsarNamespace(),
 			"pulsar_topic":     resourcePulsarTopic(),
+			"pulsar_function":  resourcePulsarFunction(),
 		},
 	}
 
