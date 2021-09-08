@@ -23,9 +23,17 @@ import (
 )
 
 func sharedClient(url string) (interface{}, error) {
+	return sharedVersionedClient(url, common.V2)
+}
+
+func sharedClientV3(url string) (interface{}, error) {
+	return sharedVersionedClient(url, common.V3)
+}
+
+func sharedVersionedClient(url string, version common.APIVersion) (interface{}, error) {
 	config := &common.Config{
 		WebServiceURL:    url,
-		PulsarAPIVersion: common.V2,
+		PulsarAPIVersion: version,
 	}
 
 	return pulsar.New(config)
