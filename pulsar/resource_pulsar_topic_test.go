@@ -146,7 +146,7 @@ func testTopicWithPermissionGrantUpdate(t *testing.T, pnum int) {
 }
 
 func testPulsarTopicDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(pulsar.Client).Topics()
+	client := getClientV2FromMeta(testAccProvider.Meta()).Topics()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "pulsar_topic" {
@@ -193,7 +193,7 @@ func testPulsarTopicExists(topic string) resource.TestCheckFunc {
 			return fmt.Errorf("ERROR_READ_NAMESPACE: %w", err)
 		}
 
-		client := testAccProvider.Meta().(pulsar.Client).Topics()
+		client := getClientV2FromMeta(testAccProvider.Meta()).Topics()
 		partitionedTopics, nonPartitionedTopics, err := client.List(*namespace)
 		if err != nil {
 			return fmt.Errorf("ERROR_READ_TOPIC_DATA: %w", err)

@@ -291,7 +291,7 @@ func testPulsarNamespaceExists(ns string) resource.TestCheckFunc {
 			return fmt.Errorf("NOT_FOUND: %s", ns)
 		}
 
-		client := testAccProvider.Meta().(pulsar.Client).Namespaces()
+		client := getClientV2FromMeta(testAccProvider.Meta()).Namespaces()
 
 		if rs.Primary.ID == "" || !strings.Contains(rs.Primary.ID, "/") {
 			return fmt.Errorf(`ERROR_NAMESPACE_ID_INVALID: "%s"`, rs.Primary.ID)
@@ -332,7 +332,7 @@ func testNamespaceImported() resource.ImportStateCheckFunc {
 }
 
 func testPulsarNamespaceDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(pulsar.Client).Namespaces()
+	client := getClientV2FromMeta(testAccProvider.Meta()).Namespaces()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "pulsar_namespace" {

@@ -128,7 +128,7 @@ func testPulsarTenantExists(tenant string) resource.TestCheckFunc {
 			return fmt.Errorf("NOT_FOUND: %s", tenant)
 		}
 
-		client := testAccProvider.Meta().(pulsar.Client).Tenants()
+		client := getClientV2FromMeta(testAccProvider.Meta()).Tenants()
 
 		_, err := client.Get(rs.Primary.ID)
 		if err != nil {
@@ -140,7 +140,7 @@ func testPulsarTenantExists(tenant string) resource.TestCheckFunc {
 }
 
 func testPulsarTenantDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(pulsar.Client).Tenants()
+	client := getClientV2FromMeta(testAccProvider.Meta()).Tenants()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "pulsar_tenant" {

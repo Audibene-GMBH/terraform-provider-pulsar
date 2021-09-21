@@ -22,7 +22,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
-	"github.com/streamnative/pulsarctl/pkg/pulsar"
 	"github.com/streamnative/pulsarctl/pkg/pulsar/utils"
 )
 
@@ -106,7 +105,7 @@ func resourcePulsarTopicImport(d *schema.ResourceData, meta interface{}) ([]*sch
 }
 
 func resourcePulsarTopicCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Topics()
+	client := getClientV2FromMeta(meta).Topics()
 
 	ok, err := resourcePulsarTopicExists(d, meta)
 	if err != nil {
@@ -136,7 +135,7 @@ func resourcePulsarTopicCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcePulsarTopicRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Topics()
+	client := getClientV2FromMeta(meta).Topics()
 
 	topicName, found, err := getTopic(d, meta)
 	if !found || err != nil {
@@ -186,7 +185,7 @@ func resourcePulsarTopicUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcePulsarTopicDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Topics()
+	client := getClientV2FromMeta(meta).Topics()
 
 	topicName, partitions, err := unmarshalTopicNameAndPartitions(d)
 	if err != nil {
@@ -213,7 +212,7 @@ func resourcePulsarTopicExists(d *schema.ResourceData, meta interface{}) (bool, 
 func getTopic(d *schema.ResourceData, meta interface{}) (*utils.TopicName, bool, error) {
 	const found, notFound = true, false
 
-	client := meta.(pulsar.Client).Topics()
+	client := getClientV2FromMeta(meta).Topics()
 
 	topicName, _, err := unmarshalTopicNameAndPartitions(d)
 	if err != nil {
@@ -274,7 +273,7 @@ func unmarshalPartitions(d *schema.ResourceData) (int, error) {
 }
 
 func updatePermissionGrant(d *schema.ResourceData, meta interface{}, topicName *utils.TopicName) error {
-	client := meta.(pulsar.Client).Topics()
+	client := getClientV2FromMeta(meta).Topics()
 
 	permissionGrantConfig := d.Get("permission_grant").(*schema.Set)
 	permissionGrants, err := unmarshalPermissionGrants(permissionGrantConfig)
@@ -311,7 +310,7 @@ func updatePermissionGrant(d *schema.ResourceData, meta interface{}, topicName *
 }
 
 func updatePartitions(d *schema.ResourceData, meta interface{}, topicName *utils.TopicName, partitions int) error {
-	client := meta.(pulsar.Client).Topics()
+	client := getClientV2FromMeta(meta).Topics()
 
 	// Note: only partition number in partitioned-topic can apply update
 	// For more info: https://github.com/streamnative/pulsarctl/blob/master/pkg/pulsar/topic.go#L36-L39

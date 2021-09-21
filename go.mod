@@ -8,5 +8,6 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/olekukonko/tablewriter v0.0.4 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/streamnative/pulsarctl v0.5.0
+	// Current master commit
+	github.com/streamnative/pulsarctl v0.4.3-0.20210916133840-55ffee240e46
 )

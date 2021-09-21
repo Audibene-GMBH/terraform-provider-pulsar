@@ -29,7 +29,6 @@ import (
 	"github.com/streamnative/terraform-provider-pulsar/types"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/streamnative/pulsarctl/pkg/pulsar"
 	"github.com/streamnative/terraform-provider-pulsar/hashcode"
 )
 
@@ -235,7 +234,7 @@ func resourcePulsarNamespace() *schema.Resource {
 }
 
 func resourcePulsarNamespaceCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Namespaces()
+	client := getClientV2FromMeta(meta).Namespaces()
 
 	ok, err := resourcePulsarNamespaceExists(d, meta)
 	if err != nil {
@@ -266,7 +265,7 @@ func resourcePulsarNamespaceCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourcePulsarNamespaceRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Namespaces()
+	client := getClientV2FromMeta(meta).Namespaces()
 
 	tenant := d.Get("tenant").(string)
 	namespace := d.Get("namespace").(string)
@@ -287,12 +286,16 @@ func resourcePulsarNamespaceRead(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("ERROR_READ_NAMESPACE: GetNamespaceAntiAffinityGroup: %w", err)
 		}
 
-		maxConsPerSub, err := client.GetMaxConsumersPerSubscription(*ns)
+		maxConsPerSub, err := fixClientIntConversion(func() (int, error) {
+			return client.GetMaxConsumersPerSubscription(*ns)
+		})
 		if err != nil {
 			return fmt.Errorf("ERROR_READ_NAMESPACE: GetMaxConsumersPerSubscription: %w", err)
 		}
 
-		maxConsPerTopic, err := client.GetMaxConsumersPerTopic(*ns)
+		maxConsPerTopic, err := fixClientIntConversion(func() (int, error) {
+			return client.GetMaxConsumersPerTopic(*ns)
+		})
 		if err != nil {
 			return fmt.Errorf("ERROR_READ_NAMESPACE: GetMaxConsumersPerTopic: %w", err)
 		}
@@ -371,7 +374,7 @@ func resourcePulsarNamespaceRead(d *schema.ResourceData, meta interface{}) error
 
 		_ = d.Set("backlog_quota", schema.NewSet(backlogQuotaToHash, []interface{}{
 			map[string]interface{}{
-				"limit_bytes": strconv.FormatInt(qt[utils.DestinationStorage].Limit, 10),
+				"limit_bytes": fmt.Sprintf("%d", qt[utils.DestinationStorage].LimitSize),
 				"policy":      string(qt[utils.DestinationStorage].Policy),
 			},
 		}))
@@ -405,7 +408,7 @@ func resourcePulsarNamespaceRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourcePulsarNamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Namespaces()
+	client := getClientV2FromMeta(meta).Namespaces()
 
 	namespace := d.Get("namespace").(string)
 	tenant := d.Get("tenant").(string)
@@ -545,7 +548,7 @@ func resourcePulsarNamespaceUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourcePulsarNamespaceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(pulsar.Client).Namespaces()
+	client := getClientV2FromMeta(meta).Namespaces()
 
 	namespace := d.Get("namespace").(string)
 	tenant := d.Get("tenant").(string)
@@ -570,7 +573,7 @@ func resourcePulsarNamespaceDelete(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourcePulsarNamespaceExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	client := meta.(pulsar.Client).Namespaces()
+	client := getClientV2FromMeta(meta).Namespaces()
 
 	tenant := d.Get("tenant").(string)
 	namespace := d.Get("namespace").(string)
@@ -700,13 +703,13 @@ func unmarshalBacklogQuota(v *schema.Set) (*utils.BacklogQuota, error) {
 			return &bklQuota, fmt.Errorf("ERROR_INVALID_BACKLOG_QUOTA_POLICY: %v", policyStr)
 		}
 
-		limit, err := strconv.Atoi(limitStr)
+		limit, err := strconv.ParseInt(limitStr, 10, 64)
 		if err != nil {
 			return &bklQuota, fmt.Errorf("ERROR_PARSE_BACKLOG_QUOTA_LIMIT: %w", err)
 		}
 
 		// zero values are fine, even if the ASCII to Int fails
-		bklQuota.Limit = int64(limit)
+		bklQuota.LimitSize = limit
 		bklQuota.Policy = policy
 	}
 

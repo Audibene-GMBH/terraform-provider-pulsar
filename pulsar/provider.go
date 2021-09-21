@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -49,6 +48,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "1",
+				Deprecated:  "The newer versions can use the right version for the right type of resource",
 				Description: descriptions["api_version"],
 			},
 			"tls_trust_certs_file_path": {
@@ -100,24 +100,26 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 	_ = tfVersion
 	clusterURL := d.Get("web_service_url").(string)
 	token := d.Get("token").(string)
-	pulsarAPIVersion := d.Get("api_version").(string)
 	TLSTrustCertsFilePath := d.Get("tls_trust_certs_file_path").(string)
 	TLSAllowInsecureConnection := d.Get("tls_allow_insecure_connection").(bool)
 
-	apiVersion, err := strconv.Atoi(pulsarAPIVersion)
-	if err != nil {
-		apiVersion = 1
-	}
+	meta := make(map[common.APIVersion]pulsar.Client, 3)
+	for _, version := range []common.APIVersion{common.V1, common.V2, common.V3} {
+		config := &common.Config{
+			WebServiceURL:              clusterURL,
+			Token:                      token,
+			PulsarAPIVersion:           version,
+			TLSTrustCertsFilePath:      TLSTrustCertsFilePath,
+			TLSAllowInsecureConnection: TLSAllowInsecureConnection,
+		}
 
-	config := &common.Config{
-		WebServiceURL:              clusterURL,
-		Token:                      token,
-		PulsarAPIVersion:           common.APIVersion(apiVersion),
-		TLSTrustCertsFilePath:      TLSTrustCertsFilePath,
-		TLSAllowInsecureConnection: TLSAllowInsecureConnection,
+		client, err := pulsar.New(config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create pulsar client: %w", err)
+		}
+		meta[version] = client
 	}
-
-	return pulsar.New(config)
+	return meta, nil
 }
 
 func validatePulsarConfig(d *schema.ResourceData) error {
@@ -125,23 +127,6 @@ func validatePulsarConfig(d *schema.ResourceData) error {
 
 	if _, err := url.Parse(webServiceURL); err != nil {
 		return fmt.Errorf("ERROR_PULSAR_CONFIG_INVALID_WEB_SERVICE_URL: %w", err)
-	}
-
-	apiVersion, ok := d.Get("api_version").(string)
-	if !ok {
-		_ = d.Set("api_version", "1")
-	}
-
-	switch apiVersion {
-	case "0":
-		_ = d.Set("api_version", "0")
-	case "1":
-		// (@TODO pulsarctl) 1 is for v2, in pulsarctl, Version is set with iota, it should be iota+1
-		_ = d.Set("api_version", "1")
-	case "2":
-		_ = d.Set("api_version", "2")
-	default:
-		_ = d.Set("api_version", "1")
 	}
 
 	return nil

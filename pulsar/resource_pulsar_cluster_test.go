@@ -133,7 +133,7 @@ func testPulsarClusterExists(cluster string) resource.TestCheckFunc {
 			return fmt.Errorf("NOT_FOUND: %s", cluster)
 		}
 
-		client := testAccProvider.Meta().(pulsar.Client).Clusters()
+		client := getClientV2FromMeta(testAccProvider.Meta()).Clusters()
 
 		_, err := client.Get(rs.Primary.ID)
 		if err != nil {
@@ -145,7 +145,7 @@ func testPulsarClusterExists(cluster string) resource.TestCheckFunc {
 }
 
 func testPulsarClusterDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(pulsar.Client).Clusters()
+	client := getClientV2FromMeta(testAccProvider.Meta()).Clusters()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "pulsar_cluster" {
