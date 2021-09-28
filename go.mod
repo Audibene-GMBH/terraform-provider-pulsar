@@ -1,6 +1,6 @@
 module github.com/streamnative/terraform-provider-pulsar
 
-go 1.13
+go 1.17
 
 require (
 	github.com/aws/aws-sdk-go v1.25.48 // indirect
@@ -13,4 +13,3 @@ require (
 	github.com/streamnative/pulsarctl v0.4.3-0.20210916133840-55ffee240e46
 )
 
-replace github.com/streamnative/pulsarctl => github.com/Audibene-GMBH/pulsarctl v0.5.0-backport
