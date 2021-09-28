@@ -85,28 +85,17 @@ func Provider() *schema.Provider {
 			return nil, diag.FromErr(err)
 		}
 
-		pulsarAPIVersion := d.Get("api_version").(string)
-		apiVersion, err := strconv.Atoi(pulsarAPIVersion)
-		if err != nil {
-			apiVersion = 1
-		}
-		client, err := providerConfigure(d, tfVersion, apiVersion)
+		output, err := providerConfigure(d, tfVersion)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-		clientV3, err := providerConfigure(d, tfVersion, int(common.V3))
-		if err != nil {
-			return nil, diag.FromErr(err)
-		}
-		pushClientV3(client, clientV3)
-		return client, nil
+		return output, nil
 	}
 
 	return provider
 }
 
-func providerConfigure(d *schema.ResourceData, tfVersion string, apiVersion int) (pulsar.Client, error) {
-
+func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, error) {
 	// can be used for version locking or version specific feature sets
 	_ = tfVersion
 	clusterURL := d.Get("web_service_url").(string)
