@@ -5,9 +5,10 @@ package pulsar
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/streamnative/pulsarctl/pkg/pulsar"
 	"github.com/streamnative/pulsarctl/pkg/pulsar/common"
-	"strconv"
 )
 
 func getClientFromMeta(version common.APIVersion, meta interface{}) pulsar.Client {
