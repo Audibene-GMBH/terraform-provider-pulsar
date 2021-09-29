@@ -23,6 +23,7 @@ PKG_NAME=pulsar
 BINARY=terraform-provider-${PKG_NAME}
 VERSION=1.0.0
 OS_ARCH?=linux_amd64
+WEB_SERVICE_URL?=http://localhost:8080
 
 default: build
 
@@ -37,7 +38,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	TF_ACC=1 go test $(TEST) -v -count 3 $(TESTARGS) -timeout 120m
+	WEB_SERVICE_URL=$(WEB_SERVICE_URL) TF_ACC=1 go test $(TEST) -v -count 3 $(TESTARGS) -timeout 120m
 
 release: fmtcheck
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
