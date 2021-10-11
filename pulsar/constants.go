@@ -14,6 +14,10 @@ const (
 	resourceCustomRuntimeOptionsAttribute = "custom_runtime_options"
 	resourceRetainOrderingAttribute       = "retain_ordering"
 
+	resourceSourceSubscriptionPositionAttribute = "subscription_position"
+	subscriptionPositionEarliest                = "Earliest"
+	subscriptionPositionLatest                  = "Latest"
+
 	processingGuaranteeEffectivelyOnce = "EFFECTIVELY_ONCE"
 	processingGuaranteeAtLeastOnce     = "ATLEAST_ONCE"
 	processingGuaranteeAtMostOnce      = "ATMOST_ONCE"
@@ -25,5 +29,9 @@ var (
 		processingGuaranteeEffectivelyOnce,
 		processingGuaranteeAtLeastOnce,
 		processingGuaranteeAtMostOnce,
+	}
+	subscriptionPositions = []string{
+		subscriptionPositionEarliest,
+		subscriptionPositionLatest,
 	}
 )
