@@ -111,6 +111,13 @@ func resourcePulsarSink() *schema.Resource {
 				Optional:    true,
 				Description: descriptions[resourceCustomRuntimeOptionsAttribute],
 			},
+			resourceSourceSubscriptionPositionAttribute: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          subscriptionPositionEarliest,
+				ValidateDiagFunc: validateOneOfFactory(subscriptionPositions),
+				Description:      descriptions[resourceSourceSubscriptionPositionAttribute],
+			},
 		},
 	}
 }
@@ -237,6 +244,7 @@ func marshalSinkData(input *schema.ResourceData) *utils.SinkConfig {
 	sinkConfig.RetainOrdering = input.Get(resourceRetainOrderingAttribute).(bool)
 	sinkConfig.ProcessingGuarantees = input.Get(resourceProcessingGuaranteesAttribute).(string)
 	sinkConfig.CustomRuntimeOptions = input.Get(resourceCustomRuntimeOptionsAttribute).(string)
+	sinkConfig.SourceSubscriptionPosition = input.Get(resourceSourceSubscriptionPositionAttribute).(string)
 
 	return &sinkConfig
 }
