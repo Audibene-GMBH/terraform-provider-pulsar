@@ -13,6 +13,7 @@ const (
 	resourceConfigsAttribute              = "configs"
 	resourceCustomRuntimeOptionsAttribute = "custom_runtime_options"
 	resourceRetainOrderingAttribute       = "retain_ordering"
+	resourceCleanupSubscriptionAttribute  = "cleanup_subscription"
 
 	resourceSourceSubscriptionPositionAttribute = "subscription_position"
 	subscriptionPositionEarliest                = "Earliest"

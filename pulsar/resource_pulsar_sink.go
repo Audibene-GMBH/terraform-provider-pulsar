@@ -106,6 +106,12 @@ func resourcePulsarSink() *schema.Resource {
 				Optional:    true,
 				Description: descriptions[resourceConfigsAttribute],
 			},
+			resourceCleanupSubscriptionAttribute: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions[resourceConfigsAttribute],
+			},
 			resourceCustomRuntimeOptionsAttribute: {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -241,6 +247,8 @@ func marshalSinkData(input *schema.ResourceData) *utils.SinkConfig {
 	sinkConfig.Parallelism = input.Get(resourceParallelismAttribute).(int)
 	sinkConfig.Inputs = handleHCLArrayV2(input.Get(resourceInputsAttribute).([]interface{}))
 	sinkConfig.Configs = input.Get(resourceConfigsAttribute).(map[string]interface{})
+
+	sinkConfig.CleanupSubscription = input.Get(resourceCleanupSubscriptionAttribute).(bool)
 	sinkConfig.RetainOrdering = input.Get(resourceRetainOrderingAttribute).(bool)
 	sinkConfig.ProcessingGuarantees = input.Get(resourceProcessingGuaranteesAttribute).(string)
 	sinkConfig.CustomRuntimeOptions = input.Get(resourceCustomRuntimeOptionsAttribute).(string)
@@ -261,6 +269,7 @@ func unmarshalSinkData(d *schema.ResourceData, sinkConfig *utils.SinkConfig) {
 	d.Set(resourceParallelismAttribute, sinkConfig.Parallelism)
 
 	d.Set(resourceConfigsAttribute, sinkConfig.Configs)
+	d.Set(resourceCleanupSubscriptionAttribute, sinkConfig.CleanupSubscription)
 	d.Set(resourceRetainOrderingAttribute, sinkConfig.RetainOrdering)
 	d.Set(resourceProcessingGuaranteesAttribute, sinkConfig.ProcessingGuarantees)
 	d.Set(resourceCustomRuntimeOptionsAttribute, sinkConfig.CustomRuntimeOptions)
