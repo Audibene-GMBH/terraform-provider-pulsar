@@ -20,6 +20,7 @@ package pulsar
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -97,6 +98,7 @@ func Provider() *schema.Provider {
 
 func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, error) {
 	// can be used for version locking or version specific feature sets
+	log.Printf("Started")
 	_ = tfVersion
 	clusterURL := d.Get("web_service_url").(string)
 	token := d.Get("token").(string)
@@ -157,5 +159,6 @@ only once, even if the message is produced more than once`,
 		"dispatch_rate":                  "Data transfer rate, in and out of the Pulsar Broker",
 		"persistence_policy":             "Policy for the namespace for data persistence",
 		"backlog_quota":                  "",
+		resourceConfigsAttribute:         "Configuration encoded as JSON",
 	}
 }

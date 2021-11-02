@@ -18,7 +18,9 @@
 package pulsar
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -102,7 +104,7 @@ func resourcePulsarSink() *schema.Resource {
 				},
 			},
 			resourceConfigsAttribute: {
-				Type:        schema.TypeMap,
+				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions[resourceConfigsAttribute],
 			},
@@ -150,9 +152,14 @@ func resourcePulsarSinkCreate(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		createSink = client.CreateSink
 	}
-	sinkConfig := marshalSinkData(d)
+	sinkConfig, err := marshalSinkData(d)
+	if err != nil {
+		return fmt.Errorf("ERROR_CREATE_SINK: %w", err)
+	}
 
-	if err := createSink(sinkConfig, archiveFile); err != nil {
+	serializedConfig, _ := json.Marshal(sinkConfig)
+	log.Printf("[DEBUG] Sink config used for creation %s", string(serializedConfig))
+	if err = createSink(sinkConfig, archiveFile); err != nil {
 		return fmt.Errorf("ERROR_CREATE_SINK: %w", err)
 	}
 
@@ -182,7 +189,10 @@ func resourcePulsarSinkRead(d *schema.ResourceData, meta interface{}) error {
 func resourcePulsarSinkUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := getClientV3FromMeta(meta).Sinks()
 
-	sinkConfig := marshalSinkData(d)
+	sinkConfig, err := marshalSinkData(d)
+	if err != nil {
+		return fmt.Errorf("ERROR_UPDATE_SINK: %w", err)
+	}
 	archiveFile := d.Get(resourceArchiveAttribute).(string)
 	isUrl := isArchiveUrl(archiveFile)
 
@@ -236,7 +246,7 @@ func resourcePulsarSinkExists(d *schema.ResourceData, meta interface{}) (bool, e
 	return true, nil
 }
 
-func marshalSinkData(input *schema.ResourceData) *utils.SinkConfig {
+func marshalSinkData(input *schema.ResourceData) (*utils.SinkConfig, error) {
 	var sinkConfig utils.SinkConfig
 
 	sinkConfig.Tenant = input.Get(resourceTenantAttribute).(string)
@@ -246,15 +256,22 @@ func marshalSinkData(input *schema.ResourceData) *utils.SinkConfig {
 	sinkConfig.Archive = input.Get(resourceArchiveAttribute).(string)
 	sinkConfig.Parallelism = input.Get(resourceParallelismAttribute).(int)
 	sinkConfig.Inputs = handleHCLArrayV2(input.Get(resourceInputsAttribute).([]interface{}))
-	sinkConfig.Configs = input.Get(resourceConfigsAttribute).(map[string]interface{})
-
+	encodedConfigs := input.Get(resourceConfigsAttribute).(string)
+	if encodedConfigs != "" {
+		var configs map[string]interface{}
+		err := json.Unmarshal([]byte(encodedConfigs), &configs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshall configs %w", err)
+		}
+		sinkConfig.Configs = configs
+	}
 	sinkConfig.CleanupSubscription = input.Get(resourceCleanupSubscriptionAttribute).(bool)
 	sinkConfig.RetainOrdering = input.Get(resourceRetainOrderingAttribute).(bool)
 	sinkConfig.ProcessingGuarantees = input.Get(resourceProcessingGuaranteesAttribute).(string)
 	sinkConfig.CustomRuntimeOptions = input.Get(resourceCustomRuntimeOptionsAttribute).(string)
 	sinkConfig.SourceSubscriptionPosition = input.Get(resourceSourceSubscriptionPositionAttribute).(string)
 
-	return &sinkConfig
+	return &sinkConfig, nil
 }
 
 func unmarshalSinkData(d *schema.ResourceData, sinkConfig *utils.SinkConfig) {
@@ -268,7 +285,6 @@ func unmarshalSinkData(d *schema.ResourceData, sinkConfig *utils.SinkConfig) {
 
 	d.Set(resourceParallelismAttribute, sinkConfig.Parallelism)
 
-	d.Set(resourceConfigsAttribute, sinkConfig.Configs)
 	d.Set(resourceCleanupSubscriptionAttribute, sinkConfig.CleanupSubscription)
 	d.Set(resourceRetainOrderingAttribute, sinkConfig.RetainOrdering)
 	d.Set(resourceProcessingGuaranteesAttribute, sinkConfig.ProcessingGuarantees)
