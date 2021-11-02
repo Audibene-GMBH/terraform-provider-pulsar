@@ -16,7 +16,7 @@
 # under the License.
 
 TEST?=./...
-GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
+GOFMT_FILES?=$(shell find . -name '*.go' | grep -v vendor)
 HOSTNAME=registry.terraform.io
 NAMESPACE=apache
 PKG_NAME=pulsar
@@ -27,8 +27,11 @@ WEB_SERVICE_URL?=http://localhost:8080
 
 default: build
 
-build: fmtcheck
-	go build -o ${BINARY}
+$(BINARY): $(GOFMT_FILES)
+	go build -o $(BINARY)
+build: $(BINARY) fmtcheck
+	@echo Done
+.PHONY = build
 
 build-dev: fmtcheck build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${PKG_NAME}/${VERSION}/${OS_ARCH}
@@ -59,7 +62,7 @@ fmt:
 	@gofmt -s -w ./$(PKG_NAME)
 
 # Currently required by tf-deploy compile
-fmtcheck:
+fmtcheck: $(GOFMT_FILES)
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
 lint:
