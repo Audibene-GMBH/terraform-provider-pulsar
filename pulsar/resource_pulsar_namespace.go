@@ -483,7 +483,8 @@ func resourcePulsarNamespaceUpdate(d *schema.ResourceData, meta interface{}) err
 		backlogQuota, err := unmarshalBacklogQuota(backlogQuotaConfig)
 		if err != nil {
 			errs = multierror.Append(errs, fmt.Errorf("unmarshalBacklogQuota: %w", err))
-		} else if err = client.SetBacklogQuota(nsName.String(), *backlogQuota); err != nil {
+		} else if err = client.SetBacklogQuota(nsName.String(), *backlogQuota, utils.DestinationStorage); err != nil {
+			// TODO: Parameterize backlogQuotaType
 			errs = multierror.Append(errs, fmt.Errorf("SetBacklogQuota: %w", err))
 		}
 	}
