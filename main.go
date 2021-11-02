@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/streamnative/terraform-provider-pulsar/pulsar"
 	"log"
+	"os"
 )
 
 func main() {
@@ -34,7 +35,13 @@ func main() {
 	opts := &plugin.ServeOpts{ProviderFunc: pulsar.Provider}
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/apache/pulsar", opts)
+		var providerAddr string
+		if addr := os.Getenv("PROVIDER_ADDR"); addr != "" {
+			providerAddr = addr
+		} else {
+			providerAddr = "registry.terraform.io/apache/pulsar"
+		}
+		err := plugin.Debug(context.Background(), providerAddr, opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
