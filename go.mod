@@ -28,7 +28,6 @@ require (
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible // indirect
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
@@ -49,18 +48,12 @@ require (
 	github.com/hashicorp/terraform-json v0.12.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.3.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
-	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/klauspost/compress v1.11.2 // indirect
-	github.com/kris-nova/logger v0.0.0-20181127235838-fd0d87064b06 // indirect
-	github.com/kris-nova/lolgopher v0.0.0-20180921204813-313b3abb0d9b // indirect
-	github.com/magiconair/properties v1.8.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
-	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.4 // indirect
@@ -69,9 +62,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/oklog/run v1.0.0 // indirect
-	github.com/olekukonko/tablewriter v0.0.1 // indirect
-	github.com/spf13/cobra v0.0.5 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ulikunitz/xz v0.5.8 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.8.4 // indirect
@@ -91,5 +81,6 @@ require (
 	google.golang.org/genproto v0.0.0-20200825200019-8632dd797987 // indirect
 	google.golang.org/grpc v1.32.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
+
+replace github.com/streamnative/pulsarctl => github.com/Audibene-GMBH/pulsarctl v0.4.3-0.20211103103506-894c3ea6799d

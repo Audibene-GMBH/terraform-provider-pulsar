@@ -314,10 +314,6 @@ func testPulsarSinkExistsFromInstanceState(client pulsar.Sinks, instanceState *t
 }
 
 func testPulsarSink(wsURL, cluster, tenant, namespace, topic, sink string) string {
-	cachedGithubFile, err := downloadAndCache(githubArchiveFile)
-	if err != nil {
-		panic(err)
-	}
 	return fmt.Sprintf(`
 provider "pulsar" {
   web_service_url = "%s"
@@ -366,7 +362,7 @@ resource "pulsar_sink" "test" {
 	)
   ]
 }
-`, wsURL, cluster, tenant, namespace, topic, sink, cachedGithubFile)
+`, wsURL, cluster, tenant, namespace, topic, sink, githubArchiveFile)
 }
 
 // func testPulsarSinkWithUndefinedOptionalsInNsConf(wsURL, cluster, tenant, ns string) string {
