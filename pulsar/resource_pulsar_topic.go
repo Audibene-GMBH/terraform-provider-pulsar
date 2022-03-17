@@ -18,10 +18,12 @@
 package pulsar
 
 import (
+	stdErrors "errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
+	"github.com/streamnative/pulsarctl/pkg/cli"
 	"github.com/streamnative/pulsarctl/pkg/pulsar/utils"
 )
 
@@ -146,7 +148,14 @@ func resourcePulsarTopicRead(d *schema.ResourceData, meta interface{}) error {
 
 	tm, err := client.GetMetadata(*topicName)
 	if err != nil {
-		return fmt.Errorf("ERROR_READ_TOPIC: GetMetadata: %w", err)
+		cliError := new(cli.Error)
+		if stdErrors.As(err, cliError) {
+			if cliError.Code == 404 {
+				d.SetId("")
+				return nil
+			}
+		}
+		return fmt.Errorf("ERROR_READ_TOPIC: GetMetadata: %s %w", topicName.String(), err)
 	}
 
 	_ = d.Set("tenant", topicName.GetTenant())
@@ -158,7 +167,7 @@ func resourcePulsarTopicRead(d *schema.ResourceData, meta interface{}) error {
 	if permissionGrantCfg, ok := d.GetOk("permission_grant"); ok && permissionGrantCfg.(*schema.Set).Len() > 0 {
 		grants, err := client.GetPermissions(*topicName)
 		if err != nil {
-			return fmt.Errorf("ERROR_READ_TOPIC: GetPermissions: %w", err)
+			return fmt.Errorf("ERROR_READ_TOPIC: GetPermissions: %s %w", topicName.String(), err)
 		}
 
 		setPermissionGrant(d, grants)
