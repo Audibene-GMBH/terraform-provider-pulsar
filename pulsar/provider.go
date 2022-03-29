@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -64,6 +65,18 @@ func Provider() *schema.Provider {
 				Description: descriptions["tls_allow_insecure_connection"],
 				DefaultFunc: schema.EnvDefaultFunc("TLS_ALLOW_INSECURE_CONNECTION", false),
 			},
+			"tls_key_file_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["tls_key_file_path"],
+				DefaultFunc: schema.EnvDefaultFunc("TLS_KEY_FILE", nil),
+			},
+			"tls_cert_file_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["tls_cert_file_path"],
+				DefaultFunc: schema.EnvDefaultFunc("TLS_CERT_FILE", nil),
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"pulsar_tenant":    resourcePulsarTenant(),
@@ -104,6 +117,8 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 	token := d.Get("token").(string)
 	TLSTrustCertsFilePath := d.Get("tls_trust_certs_file_path").(string)
 	TLSAllowInsecureConnection := d.Get("tls_allow_insecure_connection").(bool)
+	TLSKeyFile := d.Get("tls_key_file_path").(string)
+	TLSCertFile := d.Get("tls_cert_file_path").(string)
 
 	meta := make(map[common.APIVersion]pulsar.Client, 3)
 	for _, version := range []common.APIVersion{common.V1, common.V2, common.V3} {
@@ -113,6 +128,8 @@ func providerConfigure(d *schema.ResourceData, tfVersion string) (interface{}, e
 			PulsarAPIVersion:           version,
 			TLSTrustCertsFilePath:      TLSTrustCertsFilePath,
 			TLSAllowInsecureConnection: TLSAllowInsecureConnection,
+			TLSKeyFile:                 TLSKeyFile,
+			TLSCertFile:                TLSCertFile,
 		}
 
 		client, err := pulsar.New(config)
@@ -131,7 +148,31 @@ func validatePulsarConfig(d *schema.ResourceData) error {
 		return fmt.Errorf("ERROR_PULSAR_CONFIG_INVALID_WEB_SERVICE_URL: %w", err)
 	}
 
+	TLSCertFile := d.Get("tls_cert_file").(string)
+	if TLSCertFile != "" && !FileExists(TLSCertFile) {
+		return fmt.Errorf("ERROR_PULSAR_CONFIG_CERT_FILE_NOTEXIST: %q", TLSCertFile)
+	}
+
+	TLSKeyFile := d.Get("tls_key_file").(string)
+	if TLSKeyFile != "" && !FileExists(TLSKeyFile) {
+		return fmt.Errorf("ERROR_PULSAR_CONFIG_KEY_FILE_NOTEXIST: %q", TLSKeyFile)
+	}
+
+	TLSTrustCertsFilePath := d.Get("tls_trust_certs_file_path").(string)
+	if TLSTrustCertsFilePath != "" && !FileExists(TLSTrustCertsFilePath) {
+		return fmt.Errorf("ERROR_PULSAR_CONFIG_TLS_TRUST_FILE_NOTEXIST: %q", TLSTrustCertsFilePath)
+	}
+
 	return nil
+}
+
+func FileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
 
 var descriptions map[string]string
@@ -144,9 +185,10 @@ to modify Apace Pulsar Entities`,
 		"api_version":                   "Api Version to be used for the pulsar admin interaction",
 		"tls_trust_certs_file_path":     "Path to a custom trusted TLS certificate file",
 		"tls_allow_insecure_connection": "Boolean flag to accept untrusted TLS certificates",
-		"admin_roles":                   "Admin roles to be attached to tenant",
-		"allowed_clusters":              "Tenant will be able to interact with these clusters",
-		"namespace":                     "Pulsar namespaces are logical groupings of topics",
+		"tls_cert_file":                 "Filepath to certificate file to use for TLS authentication",
+		"tls_key_file":                  "Filepath to key file to use for TLS authentication", "admin_roles": "Admin roles to be attached to tenant",
+		"allowed_clusters": "Tenant will be able to interact with these clusters",
+		"namespace":        "Pulsar namespaces are logical groupings of topics",
 		"tenant": `An administrative unit for allocating capacity and enforcing an 
 authentication/authorization scheme`,
 		"namespace_list": "List of namespaces for a given tenant",
