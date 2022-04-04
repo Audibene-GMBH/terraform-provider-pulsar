@@ -85,11 +85,13 @@ provider "pulsar" {
 }
 ```
 
-| Property                      | Description                                                                                                           | Required    |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `web_service_url`             | URL of your Apache Pulsar Cluster                             | `Yes` |
-| `token`           | Authentication Token for your Apache Pulsar Cluster, which is required only if your cluster has authentication enabled| `No`       |
-| `tls_trust_certs_file_path` | Path to a custom trusted TLS certificate file | `No`       |
+| Property                        | Description                                                                                                           | Required    |
+|---------------------------------| --------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `web_service_url`               | URL of your Apache Pulsar Cluster                             | `Yes` |
+| `token`                         | Authentication Token for your Apache Pulsar Cluster, which is required only if your cluster has authentication enabled| `No`       |
+| `tls_trust_certs_file_path`     | Path to a custom trusted TLS certificate file | `No`       |
+| `tls_cert_file_path`             | Filepath to certificate file to use for TLS authentication | `No`       |
+| `tls_key_file_path`                      | Filepath to key file to use for TLS authentication | `No`       |
 | `tls_allow_insecure_connection` | Boolean flag to accept untrusted TLS certificates | `No`       |
 
 Resources

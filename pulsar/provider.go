@@ -148,12 +148,12 @@ func validatePulsarConfig(d *schema.ResourceData) error {
 		return fmt.Errorf("ERROR_PULSAR_CONFIG_INVALID_WEB_SERVICE_URL: %w", err)
 	}
 
-	TLSCertFile := d.Get("tls_cert_file").(string)
+	TLSCertFile := d.Get("tls_cert_file_path").(string)
 	if TLSCertFile != "" && !FileExists(TLSCertFile) {
 		return fmt.Errorf("ERROR_PULSAR_CONFIG_CERT_FILE_NOTEXIST: %q", TLSCertFile)
 	}
 
-	TLSKeyFile := d.Get("tls_key_file").(string)
+	TLSKeyFile := d.Get("tls_key_file_path").(string)
 	if TLSKeyFile != "" && !FileExists(TLSKeyFile) {
 		return fmt.Errorf("ERROR_PULSAR_CONFIG_KEY_FILE_NOTEXIST: %q", TLSKeyFile)
 	}
@@ -185,10 +185,11 @@ to modify Apace Pulsar Entities`,
 		"api_version":                   "Api Version to be used for the pulsar admin interaction",
 		"tls_trust_certs_file_path":     "Path to a custom trusted TLS certificate file",
 		"tls_allow_insecure_connection": "Boolean flag to accept untrusted TLS certificates",
-		"tls_cert_file":                 "Filepath to certificate file to use for TLS authentication",
-		"tls_key_file":                  "Filepath to key file to use for TLS authentication", "admin_roles": "Admin roles to be attached to tenant",
-		"allowed_clusters": "Tenant will be able to interact with these clusters",
-		"namespace":        "Pulsar namespaces are logical groupings of topics",
+		"tls_cert_file_path":            "Filepath to certificate file to use for TLS authentication",
+		"tls_key_file_path":             "Filepath to key file to use for TLS authentication",
+		"admin_roles":                   "Admin roles to be attached to tenant",
+		"allowed_clusters":              "Tenant will be able to interact with these clusters",
+		"namespace":                     "Pulsar namespaces are logical groupings of topics",
 		"tenant": `An administrative unit for allocating capacity and enforcing an 
 authentication/authorization scheme`,
 		"namespace_list": "List of namespaces for a given tenant",
