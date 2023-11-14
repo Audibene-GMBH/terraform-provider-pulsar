@@ -42,9 +42,15 @@ func resourcePulsarSink() *schema.Resource {
 				if len(parts) != 3 {
 					return nil, fmt.Errorf("the import address has to be tenant/namespace/sink")
 				}
-				d.Set(resourceTenantAttribute, parts[0])
-				d.Set(resourceNamespaceAttribute, parts[1])
-				d.Set(resourceSinkAttribute, parts[2])
+				if err := d.Set(resourceTenantAttribute, parts[0]); err != nil {
+					return nil, err
+				}
+				if err := d.Set(resourceNamespaceAttribute, parts[1]); err != nil {
+					return nil, err
+				}
+				if err := d.Set(resourceSinkAttribute, parts[2]); err != nil {
+					return nil, err
+				}
 				d.SetId(parts[2])
 
 				err := resourcePulsarSinkRead(d, meta)
@@ -279,16 +285,16 @@ func unmarshalSinkData(d *schema.ResourceData, sinkConfig *utils.SinkConfig) {
 	// And terraform will see it as a drift.
 	// Let terraform deal with the change if the user changed these variables.
 
-	d.Set(resourceTenantAttribute, sinkConfig.Tenant)
-	d.Set(resourceNamespaceAttribute, sinkConfig.Namespace)
-	d.Set(resourceSinkAttribute, sinkConfig.Name)
+	_ = d.Set(resourceTenantAttribute, sinkConfig.Tenant)
+	_ = d.Set(resourceNamespaceAttribute, sinkConfig.Namespace)
+	_ = d.Set(resourceSinkAttribute, sinkConfig.Name)
 
-	d.Set(resourceParallelismAttribute, sinkConfig.Parallelism)
+	_ = d.Set(resourceParallelismAttribute, sinkConfig.Parallelism)
 
-	d.Set(resourceCleanupSubscriptionAttribute, sinkConfig.CleanupSubscription)
-	d.Set(resourceRetainOrderingAttribute, sinkConfig.RetainOrdering)
-	d.Set(resourceProcessingGuaranteesAttribute, sinkConfig.ProcessingGuarantees)
-	d.Set(resourceCustomRuntimeOptionsAttribute, sinkConfig.CustomRuntimeOptions)
+	_ = d.Set(resourceCleanupSubscriptionAttribute, sinkConfig.CleanupSubscription)
+	_ = d.Set(resourceRetainOrderingAttribute, sinkConfig.RetainOrdering)
+	_ = d.Set(resourceProcessingGuaranteesAttribute, sinkConfig.ProcessingGuarantees)
+	_ = d.Set(resourceCustomRuntimeOptionsAttribute, sinkConfig.CustomRuntimeOptions)
 }
 
 func isArchiveUrl(archiveFile string) bool {
