@@ -16,10 +16,6 @@ func getClientFromMeta(version common.APIVersion, meta interface{}) pulsar.Clien
 	return versions[version]
 }
 
-func getClientV1FromMeta(meta interface{}) pulsar.Client {
-	return getClientFromMeta(common.V1, meta)
-}
-
 func getClientV2FromMeta(meta interface{}) pulsar.Client {
 	return getClientFromMeta(common.V2, meta)
 }

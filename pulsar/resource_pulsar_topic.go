@@ -183,11 +183,15 @@ func resourcePulsarTopicUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("partitions") {
-		updatePartitions(d, meta, topicName, partitions)
+		if err := updatePartitions(d, meta, topicName, partitions); err != nil {
+			return err
+		}
 	}
 
 	if d.HasChange("permission_grant") {
-		updatePermissionGrant(d, meta, topicName)
+		if err := updatePermissionGrant(d, meta, topicName); err != nil {
+			return err
+		}
 	}
 
 	return resourcePulsarTopicRead(d, meta)
