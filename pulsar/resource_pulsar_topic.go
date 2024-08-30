@@ -282,6 +282,14 @@ func unmarshalPartitions(d *schema.ResourceData) (int, error) {
 		return -1, errors.Errorf("invalid partition number '%d'", partitions)
 	}
 
+	if partitions == 1 {
+		// 1 partition is a non partitioned topic, once the topic is created with partition 1,
+		// this topic on the cluster becomes partition 0.
+		// This behavior cause issues, because terraform sees as the number of partitions is being changed.
+		// For this reason if the partition is set to 1, we force the partition value to be 0.
+		return 0, nil
+	}
+
 	return partitions, nil
 }
 
@@ -290,7 +298,6 @@ func updatePermissionGrant(d *schema.ResourceData, meta interface{}, topicName *
 
 	permissionGrantConfig := d.Get("permission_grant").(*schema.Set)
 	permissionGrants, err := unmarshalPermissionGrants(permissionGrantConfig)
-
 	if err != nil {
 		return fmt.Errorf("ERROR_UPDATE_TOPIC_PERMISSION_GRANT: unmarshalPermissionGrants: %w", err)
 	}
