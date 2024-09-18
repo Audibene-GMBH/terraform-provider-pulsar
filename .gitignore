@@ -71,3 +71,5 @@ gen
 
 .vscode/
 .terraform.lock.hcl
+
+dist/
