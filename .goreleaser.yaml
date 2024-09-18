@@ -59,4 +59,4 @@ release:
   # draft: true
   prerelease: auto
 changelog:
-  skip: true
+  disable: true
